@@ -52,7 +52,7 @@ void mostraElementosDoGrupo(float cuboDeDados[][100][3], int grupo) {
 	for (int i = 0; i < 90; i++) {
 	
 		for (int j = 0; j < 3; j++)
-			printf ("%.2f\t", cuboDeDados[0][i][j]); //print de todos os elementos do grupo desejado
+			printf ("%.2f\t", cuboDeDados[grupo][i][j]); //print de todos os elementos do grupo desejado
 		
 		printf("\n");
 	
@@ -76,6 +76,7 @@ void insereDadosG(float grupoG[][3], int dadosExternos[][2]) {
 
 void mostraMatrix(float matrix[][3]) {
 	
+	
 	printf("X [0]\tY [1]\tINDEX [2]\n\n"); //cabeçalho dos elementos
 	for (int i = 0; i < 90; i++) {
 	
@@ -87,6 +88,7 @@ void mostraMatrix(float matrix[][3]) {
 	}
 	
 }
+
 int main () {
 	
 	float cuboDeDados[5][100][3]; //estrutura principal, x, y e index de cada elemento de cada grupo (AGt)
