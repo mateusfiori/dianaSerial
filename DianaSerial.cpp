@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 //Grupos de elementos(objetos) serão identificados por números começando do 0 (ZERO)
 //Portanto o primeiro grupo será o grupo 0 
@@ -10,7 +11,7 @@ void preencheEstrutura(float cuboDeDados[][100][3]) {
 		for (int i = 0; i < 5; i++)
 			for (int j = 0; j < 100; j++)
 				for (int k = 0; k < 3; k++) 
-					cuboDeDados[i][j][k] = 4; 	
+					cuboDeDados[i][j][k] = -1; 	
 	
 }
 
@@ -89,21 +90,52 @@ void mostraMatrix(float matrix[][3]) {
 	
 }
 
+void preencheMatrizDiss(float matrizDissimilaridade[][91], float grupoG[][3], int qteElementos) {
+	
+	//montar uma matriz de dissimilaridade
+	//matrizes de dissimilaridade são preenchidas com distâncias euclidianas
+		
+	for (int i = 0; i < qteElementos; i++) {
+	
+		for (int j = 0; j < qteElementos; j++)
+			matrizDissimilaridade[i][j] = sqrt((grupoG[i][0] - grupoG[j][0]) * (grupoG[i][0] - grupoG[j][0]) +
+													 (grupoG[i][1] - grupoG[j][1]) * (grupoG[i][1] - grupoG[j][1])); // distancia euclidiana
+		
+		matrizDissimilaridade[i][qteElementos] = grupoG[i][2]; //ultima posição é reservada para a identificação do elemento
+	}
+}
+
+void mostraMatrixDiss(float matrix[][91]) {
+	
+	
+	printf("X [0]\tY [1]\tINDEX [2]\n\n"); //cabeçalho dos elementos
+	for (int i = 0; i < 50; i++) {
+	
+		for (int j = 80; j < 91; j++)
+			printf ("%.2f\t", matrix[i][j]); //print de todos os elementos da matrix
+		
+		printf("\n");
+	
+	}
+	
+}
+
 int main () {
 	
-	float cuboDeDados[5][100][3]; //estrutura principal, x, y e index de cada elemento de cada grupo (AGt)
-	float matrizDissimilaridade[90][90]; //estatica porém pode ser implementada dinâmica
+	float cuboDeDados[10][100][3]; //estrutura principal, x, y e index de cada elemento de cada grupo (AGt)
+	float matrizDissimilaridade[91][91]; //estática porém pode ser implementada dinâmica e possui 90+1 espaços pois o ultimo espaço é reservado para o index do elemento
 	float grupoG[90][3]; //grupo a ser trabalhado no laço do algoritmo (G) => (x, y, index)
 	float grupoTempG[90][3]; //grupo auxiliar utilizado para divisão de grupos
 	int dadosExternos[90][2]; // matriz que armazena os dados vindo externamente (arquivo .txt) (X)
-	int maxGrupos, it;
+	int maxGrupos, it, qteElementos;
 	
 	//definições de variáveis
 	maxGrupos = 10; //numero maximo de grupos
 	it = 1; //numero de iterações
+	qteElementos = 90; //quantidade de elementos existentes no grupoG
 
-	//Preenche as caracteristicas de cada dado com um valor especificado
-	//preencheEstrutura(cuboDeDados);
+	//Preenche as caracteristicas de cada dado com um valor especificado (-1)
+	preencheEstrutura(cuboDeDados);
 			
 	//pega os dados de um arquivo e coloca na matriz dadosExternos (X), matriz que vai ser posta na estrutura posteriormente	
 	coletaDadosExternos(dadosExternos); //(X)
@@ -115,27 +147,26 @@ int main () {
 	insereDadosG(grupoG, dadosExternos); // **(G <- X)**
 	
 	//mostra elementos da matrix (grupoG)
-	mostraMatrix(grupoG);
+	//mostraMatrix(grupoG);
 	
 	//mostra na tela os elementos de um grupo em especifico
 	//mostraElementosDoGrupo(cuboDeDados, 0); 
 	
 	//****até este momento os dados estão todos agrupados em um só grupo***//
 	
+	//preenche a matriz de dissimilaridade (ultima posição reservada para o index do elemento)
+	preencheMatrizDiss(matrizDissimilaridade, grupoG, qteElementos);
+	
+	//mostra a matriz de dissimilaridade
+	mostraMatrixDiss(matrizDissimilaridade);
+	
+	//proxima coisa a se fazer é tirar as medias de distancia de cada elemento e verificar qual é a maior
+	//depois esse elemento identificado vai ser retirado do grupoG e colocado num grupo chamado tempG
+	
 	/*
 	do{
 	
-		//montar um matriz de dissimilaridade
-		
-		for (int i = 0; i < 90; i++)
-			for (int j = 0; j < 90; j++)
-				matrizDissimilaridade[i][j] = (grupoG[i][0] op grupo[j][0]) ^ (grupoG[i][1] op grupo[j][1]); operações com x e y
-	
-	
-	
-	
-	
-		
+			
 	}while(it < maxGrupos); // repete até que o numero de iterações seja o maxGrupos
 	*/
 	
