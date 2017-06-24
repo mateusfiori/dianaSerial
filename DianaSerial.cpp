@@ -120,12 +120,44 @@ void mostraMatrixDiss(float matrix[][91]) {
 	
 }
 
+void preencheMatrizAVG(float matrizDissimilaridade[][91], float avgDiss[][2], int qteElementos) {
+	
+	float soma = 0.0;
+	
+	for (int i = 0; i < qteElementos; i++) {
+		
+		for (int j = 0; j < qteElementos; j++)
+			soma += matrizDissimilaridade[i][j]; 
+		
+		avgDiss[i][0] = soma;
+		avgDiss[i][1] = matrizDissimilaridade[i][qteElementos];
+		soma = 0.0;
+		}
+		
+}
+
+void mostraMatrixAVG(float matrix[][2]) {
+	
+	
+	printf("Media [0]\tINDEX [1]\n\n"); //cabeçalho dos elementos
+	for (int i = 0; i < 90; i++) {
+	
+		for (int j = 0; j < 2; j++)
+			printf ("%.2f\t\t", matrix[i][j]); //print de todos os elementos de uma matrix
+		
+		printf("\n");
+	
+	}
+	
+}
+
 int main () {
 	
 	float cuboDeDados[10][100][3]; //estrutura principal, x, y e index de cada elemento de cada grupo (AGt)
 	float matrizDissimilaridade[91][91]; //estática porém pode ser implementada dinâmica e possui 90+1 espaços pois o ultimo espaço é reservado para o index do elemento
 	float grupoG[90][3]; //grupo a ser trabalhado no laço do algoritmo (G) => (x, y, index)
 	float grupoTempG[90][3]; //grupo auxiliar utilizado para divisão de grupos
+	float avgDiss[90][2]; //matriz que armazena as medias de dissimilaridade de cada elemento
 	int dadosExternos[90][2]; // matriz que armazena os dados vindo externamente (arquivo .txt) (X)
 	int maxGrupos, it, qteElementos;
 	
@@ -133,7 +165,7 @@ int main () {
 	maxGrupos = 10; //numero maximo de grupos
 	it = 1; //numero de iterações
 	qteElementos = 90; //quantidade de elementos existentes no grupoG
-
+	
 	//Preenche as caracteristicas de cada dado com um valor especificado (-1)
 	preencheEstrutura(cuboDeDados);
 			
@@ -158,11 +190,15 @@ int main () {
 	preencheMatrizDiss(matrizDissimilaridade, grupoG, qteElementos);
 	
 	//mostra a matriz de dissimilaridade
-	mostraMatrixDiss(matrizDissimilaridade);
+	//mostraMatrixDiss(matrizDissimilaridade);
 	
 	//proxima coisa a se fazer é tirar as medias de distancia de cada elemento e verificar qual é a maior
-	//depois esse elemento identificado vai ser retirado do grupoG e colocado num grupo chamado tempG
 	
+	preencheMatrizAVG(matrizDissimilaridade, avgDiss, qteElementos);	
+	mostraMatrixAVG(avgDiss);	
+	
+	//depois esse elemento identificado vai ser retirado do grupoG e colocado num grupo chamado tempG
+	//antes de preencher qualquer matriz é necessário reseta-la, ou seja, preenche-la com numeros negativos
 	/*
 	do{
 	
