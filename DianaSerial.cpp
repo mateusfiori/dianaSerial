@@ -151,6 +151,18 @@ void mostraMatrixAVG(float matrix[][2]) {
 	
 }
 
+float identificaMaiorDiss(float avgDiss[][2], int qteElementos) {
+	
+	float maiorDiss = avgDiss[0][0];
+	float id = 0;
+	
+	for (int i = 0; i < qteElementos; i++) 
+		if(avgDiss[i][0] > maiorDiss)
+			id = avgDiss[i][1];
+			
+	return id;		
+}
+
 int main () {
 	
 	float cuboDeDados[10][100][3]; //estrutura principal, x, y e index de cada elemento de cada grupo (AGt)
@@ -158,6 +170,7 @@ int main () {
 	float grupoG[90][3]; //grupo a ser trabalhado no laço do algoritmo (G) => (x, y, index)
 	float grupoTempG[90][3]; //grupo auxiliar utilizado para divisão de grupos
 	float avgDiss[90][2]; //matriz que armazena as medias de dissimilaridade de cada elemento
+	float maiorDiss[2]; //estrutura que armazena a maior distancia e qual elemento ela pertence
 	int dadosExternos[90][2]; // matriz que armazena os dados vindo externamente (arquivo .txt) (X)
 	int maxGrupos, it, qteElementos;
 	
@@ -186,18 +199,24 @@ int main () {
 	
 	//****até este momento os dados estão todos agrupados em um só grupo***//
 	
+	//Aqui começa o laço principal (do while)
+	
 	//preenche a matriz de dissimilaridade (ultima posição reservada para o index do elemento)
 	preencheMatrizDiss(matrizDissimilaridade, grupoG, qteElementos);
 	
 	//mostra a matriz de dissimilaridade
 	//mostraMatrixDiss(matrizDissimilaridade);
 	
-	//proxima coisa a se fazer é tirar as medias de distancia de cada elemento e verificar qual é a maior
-	
+	//preenche a matriz com as médias de distancia de cada elemento
 	preencheMatrizAVG(matrizDissimilaridade, avgDiss, qteElementos);	
-	mostraMatrixAVG(avgDiss);	
 	
-	//depois esse elemento identificado vai ser retirado do grupoG e colocado num grupo chamado tempG
+	//mostra a matrix de medias de distancias
+	mostraMatrixAVG(avgDiss);
+	
+	//função para encontrar o elemento com a maior media de distancias	
+	printf("\nMaior dissimilaridade: %d <- INDEX", (int) identificaMaiorDiss(avgDiss, qteElementos));
+		
+	
 	//antes de preencher qualquer matriz é necessário reseta-la, ou seja, preenche-la com numeros negativos
 	/*
 	do{
