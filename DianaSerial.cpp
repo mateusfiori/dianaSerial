@@ -90,6 +90,21 @@ void mostraMatrix(float matrix[][3]) {
 	
 }
 
+void mostraMatrixDx(float matrix[][2]) {
+	
+	
+	printf("Media [0]\tINDEX [1]\n\n"); //cabeçalho dos elementos
+	for (int i = 0; i < 90; i++) {
+	
+		for (int j = 0; j < 2; j++)
+			printf ("%.2f\t\t", matrix[i][j]); //print de todos os elementos de uma matrix
+		
+		printf("\n");
+	
+	}
+	
+}
+
 void preencheMatrizDiss(float matrizDissimilaridade[][91], float grupoG[][3], int qteElementos) {
 	
 	//montar uma matriz de dissimilaridade
@@ -171,6 +186,15 @@ void inicializaMatrizNegativo(float matrizG[][3]) {
 	
 }
 
+//inicializa a matriz Dx com -99999.99, numero que é improvavel de acontecer
+void inicializaMatrizDx(float Dx[][2]) {
+	
+	for(int i = 0; i < 90; i++)
+		for(int j = 0; j < 2; j++)
+			Dx[i][j] = -99999.99;
+	
+}
+
 void deletaElementoDiss(float grupoG[][3], float elementoMaisDissimilar, int *qteElementos, float elementoAux[]) {
 	
 	for (int i = 0; i < *qteElementos; i++) {
@@ -193,7 +217,7 @@ void deletaElementoDiss(float grupoG[][3], float elementoMaisDissimilar, int *qt
 		grupoG[*qteElementos-1][0] = -1.0; //coloca -1 na ultima posição e depois diminui a quantidade de elementos	
 		grupoG[*qteElementos-1][1] = -1.0;
 		grupoG[*qteElementos-1][2] = -1.0; //coloca -1 na ultima posição e depois diminui a quantidade de elementos
-		qteElementos--;
+		*qteElementos -= 1;
 		break;
 		}
 		
@@ -214,6 +238,65 @@ void colocaElementoTempG(float tempG[][3], float elementoAux[]) {
 	
 }
 
+//partindo do principio que o max de elementos é 90, quando aumentar a quantidade de dados tem que mudar essa funcao
+int contaElementosTempG (float tempG[][3]) {
+	
+	int quantidade = 0;
+		
+	for (int i = 0; i < 90; i++) {
+	
+		if (tempG[i][0] < 0)
+			break;
+		else {
+			quantidade++;
+		}
+	
+	}
+	
+	return quantidade;
+}
+
+void preencheDx(float Dx[][2], float grupoG[][3], float tempG[][3], int qteElementos, int qteElementosTempG) {
+	
+	float somaG, distG, somaTempG, distTempG;
+	
+	somaTempG = 0;
+	somaG = 0;
+	distTempG = 0;
+	distG = 0;
+	
+	for (int i = 0; i < qteElementos; i++) {
+		
+		somaTempG = 0;
+		somaG = 0;
+		
+		//esse for ira somar as distancias de i com relação a todos os elementos do grupoG
+		for (int j = 0; j < qteElementos; j++) {
+			
+			if(tempG[j][0] >= 0) {
+				
+				distTempG = sqrt((grupoG[i][0] - tempG[j][0]) * (grupoG[i][0] - tempG[j][0]) +
+													 (grupoG[i][1] - tempG[j][1]) * (grupoG[i][1] - tempG[j][1]));
+				somaTempG += distTempG;
+			} //fim do if
+			
+			distG = sqrt((grupoG[i][0] - grupoG[j][0]) * (grupoG[i][0] - grupoG[j][0]) +
+													 (grupoG[i][1] - grupoG[j][1]) * (grupoG[i][1] - grupoG[j][1]));
+			somaG += distG;
+				
+		} //fim do segundo for
+		
+		//atribuição da diferença da soma a estrutura D(x)
+		somaG /= (qteElementos-1); // qteElementos-1 pois não se leva em consideração a distancia do elemento de g com relação a ele mesmo
+		somaTempG /= qteElementosTempG;
+		
+		Dx[i][0] = somaG-somaTempG; //diferença das distancias
+		Dx[i][1] = grupoG[i][2]; //index do elemento
+	
+	} //fim do primeiro for
+	
+}
+
 int main () {
 	
 	float cuboDeDados[10][100][3]; //estrutura principal, x, y e index de cada elemento de cada grupo (AGt)
@@ -224,13 +307,15 @@ int main () {
 	float avgDiss[90][2]; //matriz que armazena as medias de dissimilaridade de cada elemento
 	float maiorDiss[2]; //estrutura que armazena a maior distancia e qual elemento ela pertence
 	float elementoAux[3];//estrutura que guarda o elemento que sera deletado e colocado em tempG
+	float Dx[90][2]; //matriz que armazenara a diferença das somas das distancias e o index do elemento
 	int dadosExternos[90][2]; // matriz que armazena os dados vindo externamente (arquivo .txt) (X)
-	int maxGrupos, it, qteElementos;
+	int maxGrupos, it, qteElementos, qteElementosTempG;
 	
 	//definições de variáveis
 	maxGrupos = 10; //numero maximo de grupos
 	it = 1; //numero de iterações
 	qteElementos = 90; //quantidade de elementos existentes no grupoG
+	qteElementosTempG = 0; //valor inicial, sera mudado posteriormente pela função contaElementosTempG
 	
 	//Preenche as caracteristicas de cada dado com um valor especificado (-1)
 	preencheEstrutura(cuboDeDados);
@@ -277,15 +362,24 @@ int main () {
 	//coloca o elemento em tempG 
 	colocaElementoTempG(tempG, elementoAux);
 	
-	//proximo passo é pegar cada elemento de grupoG e fazer a media de distancia com relação a todos os elementos de G e com relação a cada elemento de tempG
-	//depois deve-se tirar essas duas medias e armazenar em D(x), o elemento que obtiver maior D(x) sera tirado do grupoG 
+	printf ("\n\nX: %f\tY: %f\tINDEX: %f\nQteElementos em grupoG: %d\tQteElementos em tempG: %d\n\n", elementoAux[0], elementoAux[1], elementoAux[2], qteElementos, qteElementosTempG);
 	
+	//a partir de agora começa o segundo laço que rodara ate que não existam mais valores Dx positivos
+	 
+	//conta quantos elementos tem em tempG
+	qteElementosTempG = contaElementosTempG(tempG);
 	
-	printf ("\n\nX: %f\tY: %f\tINDEX: %f\tQTE ELEMENTOS: %d\n\n", elementoAux[0], elementoAux[1], elementoAux[2], qteElementos);
+	inicializaMatrizDx(Dx);
 	
-	mostraMatrix(tempG);
+	//matriz que contém a diferença das médias das distancias de cada elemento do grupoG 
+	//com relação aos elementos do grupoG menos as medias das distancias do elementos em relação aos elementos do grupo tempG
+	preencheDx(Dx, grupoG, tempG, qteElementos, qteElementosTempG); //Dx -> (diferença das medias, index)	
 	
-	
+	//o elemento que obtiver maior D(x) sera tirado do grupoG
+
+	mostraMatrixDx(Dx);
+	//mostraMatrix(grupoG);
+		
 	//antes de preencher qualquer matriz é necessário reseta-la, ou seja, preenche-la com numeros negativos
 	/*
 	do{
