@@ -171,11 +171,31 @@ float identificaMaiorDiss(float avgDiss[][2], int qteElementos) {
 	float maiorDiss = avgDiss[0][0];
 	float id = 0;
 	
-	for (int i = 0; i < qteElementos; i++) 
-		if(avgDiss[i][0] > maiorDiss)
+	for (int i = 0; i < qteElementos; i++) {
+		if(avgDiss[i][0] > maiorDiss){
+			maiorDiss = avgDiss[i][0];
 			id = avgDiss[i][1];
-			
+		}
+	}
+	
 	return id;		
+}
+
+float identificaMaiorDx(float Dx[][2], int qteElementos) {
+	
+	float maiorDx = Dx[0][0];
+	float id = 0;
+	
+	for (int i = 0; i < qteElementos; i++) {
+
+		if(Dx[i][0] > maiorDx) {
+			maiorDx = Dx[i][0];	
+			id = Dx[i][1];
+		}
+	}
+	
+	if(maiorDx < 0) return -1; //retorna negativo se o maior valor for negativo e portanto para o loop
+		else	return id;			
 }
 
 void inicializaMatrizNegativo(float matrizG[][3]) {
@@ -362,12 +382,12 @@ int main () {
 	//coloca o elemento em tempG 
 	colocaElementoTempG(tempG, elementoAux);
 	
+	//conta quantos elementos tem em tempG
+	qteElementosTempG = contaElementosTempG(tempG);
+	
 	printf ("\n\nX: %f\tY: %f\tINDEX: %f\nQteElementos em grupoG: %d\tQteElementos em tempG: %d\n\n", elementoAux[0], elementoAux[1], elementoAux[2], qteElementos, qteElementosTempG);
 	
 	//a partir de agora começa o segundo laço que rodara ate que não existam mais valores Dx positivos
-	 
-	//conta quantos elementos tem em tempG
-	qteElementosTempG = contaElementosTempG(tempG);
 	
 	inicializaMatrizDx(Dx);
 	
@@ -375,7 +395,11 @@ int main () {
 	//com relação aos elementos do grupoG menos as medias das distancias do elementos em relação aos elementos do grupo tempG
 	preencheDx(Dx, grupoG, tempG, qteElementos, qteElementosTempG); //Dx -> (diferença das medias, index)	
 	
-	//o elemento que obtiver maior D(x) sera tirado do grupoG
+	//o elemento que obtiver maior D(x) sera tirado do grupoG e colocado no grupo tempG
+	//identifica o maior Dx, se o valor do index for negativo é porque todos os valores de Dx são negativos, portanto deve-se sair do laço
+	printf("\nMaior elemento de Dx: %.2f <- INDEX\n\n", identificaMaiorDx(Dx, qteElementos));
+
+	//proximo passo é retirar o elemento encontrado do grupoG e coloca-lo em tempG
 
 	mostraMatrixDx(Dx);
 	//mostraMatrix(grupoG);
