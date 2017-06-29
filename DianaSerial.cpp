@@ -328,6 +328,7 @@ int main () {
 	float maiorDiss[2]; //estrutura que armazena a maior distancia e qual elemento ela pertence
 	float elementoAux[3];//estrutura que guarda o elemento que sera deletado e colocado em tempG
 	float Dx[90][2]; //matriz que armazenara a diferença das somas das distancias e o index do elemento
+	float idDx;
 	int dadosExternos[90][2]; // matriz que armazena os dados vindo externamente (arquivo .txt) (X)
 	int maxGrupos, it, qteElementos, qteElementosTempG;
 	
@@ -336,6 +337,7 @@ int main () {
 	it = 1; //numero de iterações
 	qteElementos = 90; //quantidade de elementos existentes no grupoG
 	qteElementosTempG = 0; //valor inicial, sera mudado posteriormente pela função contaElementosTempG
+	idDx = 0; //inicia com algum valor o id que sera retornado em Dx
 	
 	//Preenche as caracteristicas de cada dado com um valor especificado (-1)
 	preencheEstrutura(cuboDeDados);
@@ -397,16 +399,23 @@ int main () {
 	
 	//o elemento que obtiver maior D(x) sera tirado do grupoG e colocado no grupo tempG
 	//identifica o maior Dx, se o valor do index for negativo é porque todos os valores de Dx são negativos, portanto deve-se sair do laço
-	printf("\nMaior elemento de Dx: %.2f <- INDEX\n\n", identificaMaiorDx(Dx, qteElementos));
-
-	//proximo passo é retirar o elemento encontrado do grupoG e coloca-lo em tempG
-	//deleta elemento do grupoG
-	deletaElementoDiss(grupoG, identificaMaiorDx(Dx, qteElementos), &qteElementos, elementoAux);
-	//adiciona elemento em tempG
-	colocaElementoTempG(tempG, elementoAux);
+	idDx = identificaMaiorDx(Dx, qteElementos);
+	printf("\nMaior elemento de Dx: %.2f <- INDEX\n\n", idDx);
 	
-	//mostraMatrixDx(Dx);
-	mostraMatrix(tempG);
+	//checa se o maior valor de Dx é negativo
+	//esse if estara dentro de um laço e quando o valor de idDx for negativo tem que sair do laço
+	if (idDx > 0) {
+	
+		//proximo passo é retirar o elemento encontrado do grupoG e coloca-lo em tempG
+		//deleta elemento do grupoG
+		deletaElementoDiss(grupoG, idDx, &qteElementos, elementoAux);
+		//adiciona elemento em tempG
+		colocaElementoTempG(tempG, elementoAux);
+	
+	}
+	
+	mostraMatrixDx(Dx);
+	//mostraMatrix(tempG);
 		
 	//antes de preencher qualquer matriz é necessário reseta-la, ou seja, preenche-la com numeros negativos
 	/*
@@ -416,6 +425,6 @@ int main () {
 	}while(it < maxGrupos); // repete até que o numero de iterações seja o maxGrupos
 	*/
 	
-	//mostra a estrutura final com os grupos e seus elementos
-	
+	//mostra a estrutura final com os grupos e seus elementos	
+
 } //fim da int main
