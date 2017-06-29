@@ -400,9 +400,13 @@ int main () {
 	printf("\nMaior elemento de Dx: %.2f <- INDEX\n\n", identificaMaiorDx(Dx, qteElementos));
 
 	//proximo passo é retirar o elemento encontrado do grupoG e coloca-lo em tempG
-
-	mostraMatrixDx(Dx);
-	//mostraMatrix(grupoG);
+	//deleta elemento do grupoG
+	deletaElementoDiss(grupoG, identificaMaiorDx(Dx, qteElementos), &qteElementos, elementoAux);
+	//adiciona elemento em tempG
+	colocaElementoTempG(tempG, elementoAux);
+	
+	//mostraMatrixDx(Dx);
+	mostraMatrix(tempG);
 		
 	//antes de preencher qualquer matriz é necessário reseta-la, ou seja, preenche-la com numeros negativos
 	/*
