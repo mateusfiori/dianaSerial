@@ -184,7 +184,7 @@ float identificaMaiorDiss(float avgDiss[][2], int qteElementos) {
 float identificaMaiorDx(float Dx[][2], int qteElementos) {
 	
 	float maiorDx = Dx[0][0];
-	float id = 0;
+	float id = Dx[0][1];
 	
 	for (int i = 0; i < qteElementos; i++) {
 
@@ -330,7 +330,7 @@ int main () {
 	float Dx[90][2]; //matriz que armazenara a diferença das somas das distancias e o index do elemento
 	float idDx;
 	int dadosExternos[90][2]; // matriz que armazena os dados vindo externamente (arquivo .txt) (X)
-	int maxGrupos, it, qteElementos, qteElementosTempG;
+	int maxGrupos, it, qteElementos, qteElementosTempG, maxIt;
 	
 	//definições de variáveis
 	maxGrupos = 10; //numero maximo de grupos
@@ -338,6 +338,7 @@ int main () {
 	qteElementos = 90; //quantidade de elementos existentes no grupoG
 	qteElementosTempG = 0; //valor inicial, sera mudado posteriormente pela função contaElementosTempG
 	idDx = 0; //inicia com algum valor o id que sera retornado em Dx
+	maxIt = 0; //numero de iterações do segundo laço, usado para sair do laço caso atinja o numero maximo
 	
 	//Preenche as caracteristicas de cada dado com um valor especificado (-1)
 	preencheEstrutura(cuboDeDados);
@@ -383,39 +384,52 @@ int main () {
 	deletaElementoDiss(grupoG, identificaMaiorDiss(avgDiss, qteElementos), &qteElementos, elementoAux);
 	//coloca o elemento em tempG 
 	colocaElementoTempG(tempG, elementoAux);
+		
+	//a partir de agora começa o segundo laço que rodara ate que não existam mais valores Dx positivos	
+	do {
 	
+	maxIt++;
+	
+	//preenche as posiões com -99999,99
+	inicializaMatrizDx(Dx);
+
 	//conta quantos elementos tem em tempG
 	qteElementosTempG = contaElementosTempG(tempG);
-	
-	printf ("\n\nX: %f\tY: %f\tINDEX: %f\nQteElementos em grupoG: %d\tQteElementos em tempG: %d\n\n", elementoAux[0], elementoAux[1], elementoAux[2], qteElementos, qteElementosTempG);
-	
-	//a partir de agora começa o segundo laço que rodara ate que não existam mais valores Dx positivos
-	
-	inicializaMatrizDx(Dx);
 	
 	//matriz que contém a diferença das médias das distancias de cada elemento do grupoG 
 	//com relação aos elementos do grupoG menos as medias das distancias do elementos em relação aos elementos do grupo tempG
 	preencheDx(Dx, grupoG, tempG, qteElementos, qteElementosTempG); //Dx -> (diferença das medias, index)	
-	
+		
 	//o elemento que obtiver maior D(x) sera tirado do grupoG e colocado no grupo tempG
 	//identifica o maior Dx, se o valor do index for negativo é porque todos os valores de Dx são negativos, portanto deve-se sair do laço
 	idDx = identificaMaiorDx(Dx, qteElementos);
-	printf("\nMaior elemento de Dx: %.2f <- INDEX\n\n", idDx);
-	
+	//printf("\nMaior elemento de Dx: %.2f <- INDEX\n\n", idDx);
+
+
 	//checa se o maior valor de Dx é negativo
 	//esse if estara dentro de um laço e quando o valor de idDx for negativo tem que sair do laço
-	if (idDx > 0) {
+		if (idDx >= 0) {
 	
-		//proximo passo é retirar o elemento encontrado do grupoG e coloca-lo em tempG
-		//deleta elemento do grupoG
-		deletaElementoDiss(grupoG, idDx, &qteElementos, elementoAux);
-		//adiciona elemento em tempG
-		colocaElementoTempG(tempG, elementoAux);
+			//proximo passo é retirar o elemento encontrado do grupoG e coloca-lo em tempG
+			//deleta elemento do grupoG
+			deletaElementoDiss(grupoG, idDx, &qteElementos, elementoAux);
+			//adiciona elemento em tempG
+			colocaElementoTempG(tempG, elementoAux);
+		}
 	
-	}
+	//intrução para o laço nunca cair em loop infinito
+	if (maxIt == 100) printf("Numero maximo de iteracoes atingido.");
 	
-	mostraMatrixDx(Dx);
-	//mostraMatrix(tempG);
+	}while(idDx >= 0 && maxIt <= 100);
+	
+	//todas as variaveis precisam ser atualizadas
+	//os grupos precisam ser postos na estrutura principal
+	//é necessario medir o diametro dos grupos, escolher o maior e coloca-lo em grupoG 
+	
+	printf("\n\nQTE Elementos em G: %d\nQTE Elementos em tempG: %d\n\n", qteElementos, qteElementosTempG);
+	
+	//mostraMatrixDx(Dx);
+	mostraMatrix(tempG);
 		
 	//antes de preencher qualquer matriz é necessário reseta-la, ou seja, preenche-la com numeros negativos
 	/*
