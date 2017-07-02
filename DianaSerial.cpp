@@ -8,7 +8,6 @@
 
 #define NUM_MAX_ELEMENTOS 100
 
-
 void preencheEstrutura(float cuboDeDados[][100][3]) {
 	
 		for (int i = 0; i < 10; i++)
@@ -172,7 +171,7 @@ void mostraMatrixAVG(float matrix[][2]) {
 float identificaMaiorDiss(float avgDiss[][2], int qteElementos) {
 	
 	float maiorDiss = avgDiss[0][0];
-	float id = 0;
+	float id = avgDiss[0][1];
 	
 	for (int i = 0; i < qteElementos; i++) {
 		if(avgDiss[i][0] > maiorDiss){
@@ -440,6 +439,21 @@ void preencheMatrizDeDiametro(float cuboDeDados[][NUM_MAX_ELEMENTOS][3], float d
 		
 }
 
+float identificaMaiorDiametro(float diametroDoGrupo[][2]) {
+	
+	float maiorDiametro = diametroDoGrupo[0][0];
+	float id = diametroDoGrupo[0][1];
+	
+	for (int i = 0; i < 10; i++) {
+		if(diametroDoGrupo[i][0] > maiorDiametro){
+			maiorDiametro = diametroDoGrupo[i][0];
+			id = diametroDoGrupo[i][1];
+		}
+	}
+	
+	return id;		
+}
+
 int main () {
 	
 	float cuboDeDados[10][NUM_MAX_ELEMENTOS][3]; //estrutura principal, x, y e index de cada elemento de cada grupo (AGt)
@@ -578,8 +592,17 @@ int main () {
 		printf ("\n");
 	}
 	
+	//encontra grupo com maior diametro
+	indexMaiorDiametro = identificaMaiorDiametro(diametroDoGrupo);
+	printf("\nGrupo com maior diametro: %d", indexMaiorDiametro);
+	
+	//coloca em G o grupo com maior diametro
+		//reinicializa grupoG
+		//coloca em indexMaiorDiametro o indice do grupo com maior diametro
+		//passa grupo maior diametro pra G
+	
 	printf ("\n\nAGt:\n");
-	mostraElementosDoGrupo(cuboDeDados, 3);
+	mostraElementosDoGrupo(cuboDeDados, 1);
 	
 	printf("\n\nQTE Elementos em G: %d\nQTE Elementos em tempG: %d\n\n", qteElementos, qteElementosTempG);
 	
