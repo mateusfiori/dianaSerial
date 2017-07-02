@@ -378,6 +378,68 @@ void preencheCuboComTempG (float cuboDeDados[][NUM_MAX_ELEMENTOS][3], float temp
 		
 }
 
+void inicializaMatrizDiametro(float diametroDoGrupo[][2]) {
+	
+	for (int i = 0; i < 10; i++) {
+		
+		diametroDoGrupo[i][0] = -1;
+		diametroDoGrupo[i][1] = -1;
+		
+	}	
+}
+
+int contaElementosCubo(float cuboDeDados[][NUM_MAX_ELEMENTOS][3], int grupo){
+	
+	int cont = 0;
+	
+	for (int i = 0; i < NUM_MAX_ELEMENTOS; i++)
+		if(cuboDeDados[grupo][i][0] < 0) break;
+			else cont++;
+	return cont;	
+}
+
+void preencheMatrizDeDiametro(float cuboDeDados[][NUM_MAX_ELEMENTOS][3], float diametroDoGrupo[][2]) {
+	
+	float distanciaParcial, distanciaFinal;
+	int quantidadeDeElementosNoGrupo, k;
+	
+	k = 0;
+	
+	do {
+	
+	quantidadeDeElementosNoGrupo = contaElementosCubo(cuboDeDados, k);
+	distanciaFinal = 0;
+	
+		for(int i = 0; i < 100; i++) {
+			
+			distanciaParcial = 0;
+			
+			if (cuboDeDados[k][i][0] < 0) break;
+				else {
+				
+			for(int j = 0; j < 100; j++) {
+	
+				
+				if(cuboDeDados[k][j][0] < 0) break;
+					else {
+					
+						distanciaParcial += sqrt((cuboDeDados[k][i][0] - cuboDeDados[k][j][0]) * (cuboDeDados[k][i][0] - cuboDeDados[k][j][0]) +
+														 (cuboDeDados[k][i][1] - cuboDeDados[k][j][1]) * (cuboDeDados[k][i][1] - cuboDeDados[k][j][1]));
+					}
+				}
+			}
+			
+			distanciaFinal += distanciaParcial;
+		}
+		
+		diametroDoGrupo[k][0] = distanciaFinal/(quantidadeDeElementosNoGrupo*(quantidadeDeElementosNoGrupo-1));
+		diametroDoGrupo[k][1] = k;
+		
+		k++;
+	} while (cuboDeDados[k][0][0] >= 0); 
+		
+}
+
 int main () {
 	
 	float cuboDeDados[10][NUM_MAX_ELEMENTOS][3]; //estrutura principal, x, y e index de cada elemento de cada grupo (AGt)
@@ -390,6 +452,7 @@ int main () {
 	float elementoAux[3];//estrutura que guarda o elemento que sera deletado e colocado em tempG
 	float Dx[90][2]; //matriz que armazenara a diferença das somas das distancias e o index do elemento
 	float idDx;
+	float diametroDoGrupo[10][2]; //matriz que armazena o diametro e o grupo que ele pertence
 	int dadosExternos[90][2]; // matriz que armazena os dados vindo externamente (arquivo .txt) (X)
 	int maxGrupos, it, qteElementos, qteElementosTempG, maxIt, indexMaiorDiametro;
 	
@@ -485,7 +548,7 @@ int main () {
 	}while(idDx >= 0 && maxIt <= 100);
 	
 	//todas as variaveis precisam ser atualizadas
-	
+	it++;
 	
 	//os grupos precisam ser postos na estrutura principal
 	//indexMaiorDiametro é grupo da estrutura principal que deve ser posto o grupoG
@@ -501,18 +564,29 @@ int main () {
 	preencheCuboComTempG(cuboDeDados, tempG, encontraGrupoVazio(cuboDeDados, maxGrupos), qteElementosTempG);
 	
 	//é necessario medir o diametro dos grupos, escolher o maior e coloca-lo em grupoG
+	//preenche todas as posições de diametroGrupo com -1
+	inicializaMatrizDiametro(diametroDoGrupo);
 	
+	//preenche matriz que contem todos os diametros dos grupo existentes na estrutura principal
+	preencheMatrizDeDiametro(cuboDeDados, diametroDoGrupo);																														
 	
+	printf ("\n\n");
+	for (int i = 0; i < 10; i++){
+		for (int j = 0; j < 2; j++)
+ 			printf ("%.2f\t", diametroDoGrupo[i][j]);
+		
+		printf ("\n");
+	}
 	
 	printf ("\n\nAGt:\n");
-	mostraElementosDoGrupo(cuboDeDados, 1);
+	mostraElementosDoGrupo(cuboDeDados, 3);
 	
 	printf("\n\nQTE Elementos em G: %d\nQTE Elementos em tempG: %d\n\n", qteElementos, qteElementosTempG);
 	
 	//mostraMatrixDx(Dx);
-	mostraMatrix(tempG);
+	//mostraMatrix(tempG);
 	
-	printf ("\n\nGrupo vazio: %d", encontraGrupoVazio(cuboDeDados, maxGrupos));
+	//printf ("\n\nGrupo vazio: %d", encontraGrupoVazio(cuboDeDados, maxGrupos));
 	
 	
 	//antes de preencher qualquer matriz é necessário reseta-la, ou seja, preenche-la com numeros negativos
