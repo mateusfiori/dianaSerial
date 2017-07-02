@@ -598,8 +598,10 @@ int main () {
 	
 	//coloca em G o grupo com maior diametro
 		//reinicializa grupoG
-		//coloca em indexMaiorDiametro o indice do grupo com maior diametro
-		//passa grupo maior diametro pra G
+		//passa o grupo de maior diametro pra G
+	
+	//atualizar qteElementos de grupoG
+	
 	
 	printf ("\n\nAGt:\n");
 	mostraElementosDoGrupo(cuboDeDados, 1);
