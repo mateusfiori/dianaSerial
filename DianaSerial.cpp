@@ -10,7 +10,7 @@
 
 //para aumentar o numero de grupo é preciso alterar as declarações: maxGrupo e cuboDeDados e tambem a função que preenche o cubo
 
-#define NUM_GRUPOS 63
+#define NUM_GRUPOS 90
 #define NUM_MAX_ELEMENTOS 100
 
 void preencheEstrutura(float cuboDeDados[][100][3]) {
@@ -671,7 +671,7 @@ int main () {
 		
 		//checa se o maior valor de Dx é negativo
 		//esse if estara dentro de um laço e quando o valor de idDx for negativo tem que sair do laço
-			if (idDx >= 0) {
+			if (idDx >= 0 && qteElementos > 1) {
 				
 				//deleta o elemento de Dx
 				deletaElementoDx(Dx, qteDx, idDx);
