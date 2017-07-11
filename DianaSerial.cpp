@@ -1,19 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <windows.h>
+#include <conio.h>
 
 //Grupos de elementos(objetos) serão identificados por números começando do 0 (ZERO)
 //Portanto o primeiro grupo será o grupo 0 
 //A estrutura funciona da seguinte forma: float estrutura[grupo][elementos do grupo][informação de cada elemento -> 0 => x, 1 => y, 2 => index]
 
+//para aumentar o numero de grupo é preciso alterar as declarações: maxGrupo e cuboDeDados e tambem a função que preenche o cubo
+
+#define NUM_GRUPOS 63
 #define NUM_MAX_ELEMENTOS 100
 
 void preencheEstrutura(float cuboDeDados[][100][3]) {
 	
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 100; i++)
 			for (int j = 0; j < 100; j++)
 				for (int k = 0; k < 3; k++) 
-					cuboDeDados[i][j][k] = -1; 	
+					cuboDeDados[i][j][k] = -1.f; 	
 	
 }
 
@@ -54,10 +59,14 @@ void mostraElementosDoGrupo(float cuboDeDados[][100][3], int grupo) {
 	printf("X [0]\tY [1]\tINDEX [2]\n\n"); //cabeçalho dos elementos
 	for (int i = 0; i < NUM_MAX_ELEMENTOS; i++) {
 	
-		for (int j = 0; j < 3; j++)
-			printf ("%.2f\t", cuboDeDados[grupo][i][j]); //print de todos os elementos do grupo desejado
+		for (int j = 0; j < 3; j++) {
+			
+			if (cuboDeDados[grupo][i][j] >= 0)		
+				printf ("%.2f\t", cuboDeDados[grupo][i][j]); //print de todos os elementos do grupo desejado
+		}
 		
-		printf("\n");
+		if (cuboDeDados[grupo][i][0] >= 0 && cuboDeDados[grupo][i][1] >= 0 && cuboDeDados[grupo][i][2] >= 0)
+			printf("\n");
 	
 	}
 				
@@ -104,6 +113,14 @@ void mostraMatrixDx(float matrix[][2]) {
 		printf("\n");
 	
 	}
+	
+}
+
+void inicializaMatrizDiss(float matrizDissimilaridade[][91]) {
+	
+	for (int i = 0; i < 91; i++)
+		for (int j = 0; j < 91; j++)
+			matrizDissimilaridade[i][j] = -1;
 	
 }
 
@@ -160,7 +177,7 @@ void mostraMatrixAVG(float matrix[][2]) {
 	for (int i = 0; i < 90; i++) {
 	
 		for (int j = 0; j < 2; j++)
-			printf ("%.2f\t\t", matrix[i][j]); //print de todos os elementos de uma matrix
+			printf ("%f\t\t", matrix[i][j]); //print de todos os elementos de uma matrix
 		
 		printf("\n");
 	
@@ -185,8 +202,10 @@ float identificaMaiorDiss(float avgDiss[][2], int qteElementos) {
 
 float identificaMaiorDx(float Dx[][2], int qteElementos) {
 	
-	float maiorDx = Dx[0][0];
-	float id = Dx[0][1];
+	float maiorDx, id;
+	
+	maiorDx = Dx[0][0];
+	id = Dx[0][1];
 	
 	for (int i = 0; i < qteElementos; i++) {
 
@@ -196,8 +215,9 @@ float identificaMaiorDx(float Dx[][2], int qteElementos) {
 		}
 	}
 	
-	if(maiorDx < 0) return -1; //retorna negativo se o maior valor for negativo e portanto para o loop
-		else	return id;			
+	if(maiorDx <= 0.0) return -1; //retorna negativo se o maior valor for negativo e portanto para o loop
+		else	return id;		
+			
 }
 
 void inicializaMatrizNegativo(float matrizG[][3]) {
@@ -278,14 +298,33 @@ int contaElementosTempG (float tempG[][3]) {
 	return quantidade;
 }
 
+int contaElementosGrupoG (float grupoG[][3]) {
+	
+	int quantidade = 0;
+		
+	for (int i = 0; i < 90; i++) {
+	
+		if (grupoG[i][0] < 0)
+			break;
+		else {
+			quantidade++;
+		}
+	
+	}
+	
+	return quantidade;
+}
+
 void preencheDx(float Dx[][2], float grupoG[][3], float tempG[][3], int qteElementos, int qteElementosTempG) {
 	
 	float somaG, distG, somaTempG, distTempG;
+	int cont;
 	
 	somaTempG = 0;
 	somaG = 0;
 	distTempG = 0;
 	distG = 0;
+	cont = 0;
 	
 	for (int i = 0; i < qteElementos; i++) {
 		
@@ -295,8 +334,9 @@ void preencheDx(float Dx[][2], float grupoG[][3], float tempG[][3], int qteEleme
 		//esse for ira somar as distancias de i com relação a todos os elementos do grupoG
 		for (int j = 0; j < qteElementos; j++) {
 			
-			if(tempG[j][0] >= 0) {
+			if(tempG[j][0] >= 0.f) {
 				
+				cont++;
 				distTempG = sqrt((grupoG[i][0] - tempG[j][0]) * (grupoG[i][0] - tempG[j][0]) +
 													 (grupoG[i][1] - tempG[j][1]) * (grupoG[i][1] - tempG[j][1]));
 				somaTempG += distTempG;
@@ -317,6 +357,7 @@ void preencheDx(float Dx[][2], float grupoG[][3], float tempG[][3], int qteEleme
 	
 	} //fim do primeiro for
 	
+	printf("\nCONT COM QTETEMPG: %d\n", cont);
 }
 
 void preencheCuboComG (float cuboDeDados[][NUM_MAX_ELEMENTOS][3], float grupoG[][3], int indexMaiorDiametro, int qteElementos) {
@@ -341,15 +382,18 @@ void preencheCuboComG (float cuboDeDados[][NUM_MAX_ELEMENTOS][3], float grupoG[]
 		
 }
 
-int encontraGrupoVazio (float cuboDeDados[][NUM_MAX_ELEMENTOS][3], int maxGrupo) {
+int encontraGrupoVazio (float cuboDeDados[][NUM_MAX_ELEMENTOS][3]) {
 	
 	int grupoVazio = -1;
 	
-	for (int i = 0; i < maxGrupo; i++) 
-		if (cuboDeDados[i][0][0] < 0) {
+	for (int i = 0; i < 100; i++) {
+		
+		if (cuboDeDados[i][0][0] < 0.f) {
 			grupoVazio = i;
 			break;
 		}
+	
+	}
 	
 	return grupoVazio;	
 		
@@ -379,10 +423,10 @@ void preencheCuboComTempG (float cuboDeDados[][NUM_MAX_ELEMENTOS][3], float temp
 
 void inicializaMatrizDiametro(float diametroDoGrupo[][2]) {
 	
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < NUM_GRUPOS; i++) {
 		
-		diametroDoGrupo[i][0] = -1;
-		diametroDoGrupo[i][1] = -1;
+		diametroDoGrupo[i][0] = -1.f;
+		diametroDoGrupo[i][1] = -1.f;
 		
 	}	
 }
@@ -431,8 +475,13 @@ void preencheMatrizDeDiametro(float cuboDeDados[][NUM_MAX_ELEMENTOS][3], float d
 			distanciaFinal += distanciaParcial;
 		}
 		
-		diametroDoGrupo[k][0] = distanciaFinal/(quantidadeDeElementosNoGrupo*(quantidadeDeElementosNoGrupo-1));
+		//se tiver só um elemento no grupo o diametro é zero
+		if (quantidadeDeElementosNoGrupo > 1)
+			diametroDoGrupo[k][0] = distanciaFinal/(quantidadeDeElementosNoGrupo*(quantidadeDeElementosNoGrupo-1));
+				else diametroDoGrupo[k][0] = 0.f;
+			
 		diametroDoGrupo[k][1] = k;
+		
 		
 		k++;
 	} while (cuboDeDados[k][0][0] >= 0); 
@@ -444,7 +493,7 @@ float identificaMaiorDiametro(float diametroDoGrupo[][2]) {
 	float maiorDiametro = diametroDoGrupo[0][0];
 	float id = diametroDoGrupo[0][1];
 	
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < NUM_GRUPOS; i++) {
 		if(diametroDoGrupo[i][0] > maiorDiametro){
 			maiorDiametro = diametroDoGrupo[i][0];
 			id = diametroDoGrupo[i][1];
@@ -454,9 +503,58 @@ float identificaMaiorDiametro(float diametroDoGrupo[][2]) {
 	return id;		
 }
 
+void deletaElementoDx(float Dx[][2], int qteDx, float idDx) {
+	
+	for (int i = 0; i < qteDx; i++) {
+		
+		if(Dx[i][1] == idDx) {
+			
+			//deleta o elemento de Dx
+			for (int j = i; j < qteDx-1; j++) {
+				Dx[j][0] = Dx[j+1][0];
+				Dx[j][1] = Dx[j+1][1];
+			}
+		
+		Dx[qteDx-1][0] = -99999.99;
+		Dx[qteDx-1][1] = -99999.99;
+		break;
+			
+		}
+		
+		
+	}
+		
+}
+
+int contaElementosDx (float Dx[][2]) {
+	
+	int quantidade = 0;
+		
+	for (int i = 0; i < 90; i++) {
+	
+		if (Dx[i][1] < 0)
+			break;
+		else {
+			quantidade++;
+		}
+	
+	}
+	
+	return quantidade;
+}
+
+void preencheGcomMaiorDiametro(float cuboDeDados[][NUM_MAX_ELEMENTOS][3], float grupoG[][3], int indexMaiorDiametro) {
+	
+	for (int i = 0; i < 100; i++)
+				for (int j = 0; j < 3; j++)
+					grupoG[i][j] = cuboDeDados[indexMaiorDiametro][i][j];
+		
+}
+
+
 int main () {
 	
-	float cuboDeDados[10][NUM_MAX_ELEMENTOS][3]; //estrutura principal, x, y e index de cada elemento de cada grupo (AGt)
+	float cuboDeDados[100][NUM_MAX_ELEMENTOS][3]; //estrutura principal, x, y e index de cada elemento de cada grupo (AGt)
 	float matrizDissimilaridade[91][91]; //estática porém pode ser implementada dinâmica e possui 90+1 espaços pois o ultimo espaço é reservado para o index do elemento
 	float grupoG[90][3]; //grupo a ser trabalhado no laço do algoritmo (G) => (x, y, index)
 	float tempG[90][3]; //grupo que armazena os elementos que não fazem parte do grupoG
@@ -466,19 +564,21 @@ int main () {
 	float elementoAux[3];//estrutura que guarda o elemento que sera deletado e colocado em tempG
 	float Dx[90][2]; //matriz que armazenara a diferença das somas das distancias e o index do elemento
 	float idDx;
-	float diametroDoGrupo[10][2]; //matriz que armazena o diametro e o grupo que ele pertence
+	float diametroDoGrupo[NUM_GRUPOS][2]; //matriz que armazena o diametro e o grupo que ele pertence
 	int dadosExternos[90][2]; // matriz que armazena os dados vindo externamente (arquivo .txt) (X)
-	int maxGrupos, it, qteElementos, qteElementosTempG, maxIt, indexMaiorDiametro;
+	int maxGrupos, it, qteElementos, qteElementosTempG, maxIt, indexMaiorDiametro, qteDx;
 	
 	//definições de variáveis
-	maxGrupos = 10; //numero maximo de grupos
-	it = 1; //numero de iterações
+	maxGrupos = NUM_GRUPOS; //numero maximo de grupos
+	it = 0; //numero de iterações
 	qteElementos = 90; //quantidade de elementos existentes no grupoG
 	qteElementosTempG = 0; //valor inicial, sera mudado posteriormente pela função contaElementosTempG
 	idDx = 0; //inicia com algum valor o id que sera retornado em Dx
 	maxIt = 0; //numero de iterações do segundo laço, usado para sair do laço caso atinja o numero maximo
 	indexMaiorDiametro = 0; //variavel que armazena o index do grupo da estrutura principal com o maior diametro, para posteriormente ser substituido pelo grupoG
 	//defaul é 0 (zero) pois todos os dados externos são postos no grupo 0 (zero)
+	qteDx = 0; // inicia a quantidade de elementos em Dx
+	
 	
 	//Preenche as caracteristicas de cada dado com um valor especificado (-1)
 	preencheEstrutura(cuboDeDados);
@@ -502,126 +602,166 @@ int main () {
 	
 	//Aqui começa o laço principal (do while)
 	
-	//preenche a matriz de dissimilaridade (ultima posição reservada para o index do elemento)
-	preencheMatrizDiss(matrizDissimilaridade, grupoG, qteElementos);
-	
-	//mostra a matriz de dissimilaridade
-	//mostraMatrixDiss(matrizDissimilaridade);
-	
-	//preenche a matriz com as médias de distancia de cada elemento
-	preencheMatrizAVG(matrizDissimilaridade, avgDiss, qteElementos); //average linkage -> tera que trocar por centroid linkage	
-	
-	//mostra a matrix de medias de distancias
-	//mostraMatrixAVG(avgDiss);
-	
-	//função para encontrar o elemento com a maior media de distancias	
-	printf("\nMaior dissimilaridade: %d <- INDEX", (int) identificaMaiorDiss(avgDiss, qteElementos));
-	
-	//inicializa tempG com valores negativos
-	inicializaMatrizNegativo(tempG); //todos as posições de tempG estão preenchidas com numeros negativos
-	
-	//identifica o elemento de maior dissimilaridade, o deleta do grupoG e salva o elemento em elementoAux para depois ser posto no grupo tempG
-	deletaElementoDiss(grupoG, identificaMaiorDiss(avgDiss, qteElementos), &qteElementos, elementoAux);
-	//coloca o elemento em tempG 
-	colocaElementoTempG(tempG, elementoAux);
-		
-	//a partir de agora começa o segundo laço que rodara ate que não existam mais valores Dx positivos	
 	do {
-	
-	maxIt++;
-	
-	//preenche as posiões com -99999,99
-	inicializaMatrizDx(Dx);
-
-	//conta quantos elementos tem em tempG
-	qteElementosTempG = contaElementosTempG(tempG);
-	
-	//matriz que contém a diferença das médias das distancias de cada elemento do grupoG 
-	//com relação aos elementos do grupoG menos as medias das distancias do elementos em relação aos elementos do grupo tempG
-	preencheDx(Dx, grupoG, tempG, qteElementos, qteElementosTempG); //Dx -> (diferença das medias, index)	
 		
-	//o elemento que obtiver maior D(x) sera tirado do grupoG e colocado no grupo tempG
-	//identifica o maior Dx, se o valor do index for negativo é porque todos os valores de Dx são negativos, portanto deve-se sair do laço
-	idDx = identificaMaiorDx(Dx, qteElementos);
-	//printf("\nMaior elemento de Dx: %.2f <- INDEX\n\n", idDx);
-
-	//checa se o maior valor de Dx é negativo
-	//esse if estara dentro de um laço e quando o valor de idDx for negativo tem que sair do laço
-		if (idDx >= 0) {
+		printf ("\n\nITERACAO %d\n\n", it);
+		
+		maxIt = 0;
+		//inicializa matriz dissimilaridade com -1 em todas as posições
+		inicializaMatrizDiss(matrizDissimilaridade);
+		
+		//preenche a matriz de dissimilaridade (ultima posição reservada para o index do elemento)
+		preencheMatrizDiss(matrizDissimilaridade, grupoG, qteElementos);
+		
+		//mostra a matriz de dissimilaridade
+		//mostraMatrixDiss(matrizDissimilaridade);
+		
+		//preenche a matriz com as médias de distancia de cada elemento
+		preencheMatrizAVG(matrizDissimilaridade, avgDiss, qteElementos); //average linkage -> tera que trocar por centroid linkage	
+		
+		//mostra a matrix de medias de distancias
+		//mostraMatrixAVG(avgDiss);
+		
+		//função para encontrar o elemento com a maior media de distancias	
+		printf("\nMaior dissimilaridade: %d <- INDEX\n\n", (int) identificaMaiorDiss(avgDiss, qteElementos));
+		
+		//inicializa tempG com valores negativos
+		inicializaMatrizNegativo(tempG); //todos as posições de tempG estão preenchidas com numeros negativos
+		
+		//identifica o elemento de maior dissimilaridade, o deleta do grupoG e salva o elemento em elementoAux para depois ser posto no grupo tempG
+		deletaElementoDiss(grupoG, identificaMaiorDiss(avgDiss, qteElementos), &qteElementos, elementoAux);
+		//coloca o elemento em tempG 
+		colocaElementoTempG(tempG, elementoAux);
+		
+		
+		//preenche as posiões com -99999,99
+		inicializaMatrizDx(Dx);
 	
-			//proximo passo é retirar o elemento encontrado do grupoG e coloca-lo em tempG
-			//deleta elemento do grupoG
-			deletaElementoDiss(grupoG, idDx, &qteElementos, elementoAux);
-			//adiciona elemento em tempG
-			colocaElementoTempG(tempG, elementoAux);
+		//conta quantos elementos tem em tempG
+		qteElementosTempG = contaElementosTempG(tempG);
+		
+		//printf("\nQTE G: %d   QTE tempG: %d\n", qteElementos, qteElementosTempG);
+		
+		//matriz que contém a diferença das médias das distancias de cada elemento do grupoG 
+		//com relação aos elementos do grupoG menos as medias das distancias do elementos em relação aos elementos do grupo tempG
+		preencheDx(Dx, grupoG, tempG, qteElementos, qteElementosTempG); //Dx -> (diferença das medias, index)	
+		
+		printf ("\nmax it%d\n", maxIt);
+		mostraMatrixAVG(Dx);
+		
+			
+		//a partir de agora começa o segundo laço que rodara ate que não existam mais valores Dx positivos	
+		do {
+		
+	
+		maxIt++;
+			
+		//conta quantos elementos tem em Dx
+		qteDx = contaElementosDx(Dx);
+		
+		
+		//conta quantos elementos tem em tempG
+		qteElementosTempG = contaElementosTempG(tempG);
+			
+		//o elemento que obtiver maior D(x) sera tirado do grupoG e colocado no grupo tempG
+		//identifica o maior Dx, se o valor do index for negativo é porque todos os valores de Dx são negativos, portanto deve-se sair do laço
+		idDx = identificaMaiorDx(Dx, qteElementos);
+		printf("\nMaior elemento de Dx: %f <- INDEX\n\n", idDx);
+	
+		
+		//checa se o maior valor de Dx é negativo
+		//esse if estara dentro de um laço e quando o valor de idDx for negativo tem que sair do laço
+			if (idDx >= 0) {
+				
+				//deleta o elemento de Dx
+				deletaElementoDx(Dx, qteDx, idDx);
+				
+				printf ("EU SOU NUMERO QUATRO");
+				//proximo passo é retirar o elemento encontrado do grupoG e coloca-lo em tempG
+				//deleta elemento do grupoG
+				deletaElementoDiss(grupoG, idDx, &qteElementos, elementoAux);
+				//adiciona elemento em tempG
+				colocaElementoTempG(tempG, elementoAux);
+			}
+			
+			//if (it >= 2) getch(); 
+			//else 
+			//Sleep(500);
+			
+		//intrução para o laço nunca cair em loop infinito
+		if (maxIt == 100) printf("\n\nNumero maximo de iteracoes atingido.");
+		
+		} while(idDx >= 0 && maxIt < 100);
+		
+		printf("\nMAXIT TOTAL %d\n", maxIt);
+			
+
+		//todas as variaveis precisam ser atualizadas
+		it++;
+		printf ("\n\nIteracao %d\n\n", it);
+		
+		//os grupos precisam ser postos na estrutura principal
+		//indexMaiorDiametro é grupo da estrutura principal que deve ser posto o grupoG
+		
+		//grupoG é posto na estrutura principal
+		preencheCuboComG(cuboDeDados, grupoG, indexMaiorDiametro, qteElementos);
+		
+		//procura por um grupo vazio na estrutura principal para se colocar o grupo tempG
+		//se retornar um valor negativo é pq nao existem grupos vazios
+		printf ("\n\nGrupo vazio: %d", encontraGrupoVazio(cuboDeDados));
+		
+		//coloca tempG no grupo vazio da estrutura principal
+		preencheCuboComTempG(cuboDeDados, tempG, encontraGrupoVazio(cuboDeDados), qteElementosTempG);
+		
+		//é necessario medir o diametro dos grupos, escolher o maior e coloca-lo em grupoG
+		//preenche todas as posições de diametroGrupo com -1
+		inicializaMatrizDiametro(diametroDoGrupo);
+		
+		//preenche matriz que contem todos os diametros dos grupo existentes na estrutura principal
+		preencheMatrizDeDiametro(cuboDeDados, diametroDoGrupo);																														
+		
+		
+		printf ("\n\n");
+		for (int i = 0; i < NUM_GRUPOS; i++){
+			for (int j = 0; j < 2; j++)
+	 			printf ("%.2f\t", diametroDoGrupo[i][j]);
+			
+			printf ("\n");
 		}
-	
-	//intrução para o laço nunca cair em loop infinito
-	if (maxIt == 100) printf("Numero maximo de iteracoes atingido.");
-	
-	}while(idDx >= 0 && maxIt <= 100);
-	
-	//todas as variaveis precisam ser atualizadas
-	it++;
-	
-	//os grupos precisam ser postos na estrutura principal
-	//indexMaiorDiametro é grupo da estrutura principal que deve ser posto o grupoG
-	
-	//grupoG é posto na estrutura principal
-	preencheCuboComG(cuboDeDados, grupoG, indexMaiorDiametro, qteElementos);
-	
-	//procura por um grupo vazio na estrutura principal para se colocar o grupo tempG
-	//se retornar um valor negativo é pq nao existem grupos vazios
-	printf ("\n\nGrupo vazio: %d", encontraGrupoVazio(cuboDeDados, maxGrupos));
-	
-	//coloca tempG no grupo vazio da estrutura principal
-	preencheCuboComTempG(cuboDeDados, tempG, encontraGrupoVazio(cuboDeDados, maxGrupos), qteElementosTempG);
-	
-	//é necessario medir o diametro dos grupos, escolher o maior e coloca-lo em grupoG
-	//preenche todas as posições de diametroGrupo com -1
-	inicializaMatrizDiametro(diametroDoGrupo);
-	
-	//preenche matriz que contem todos os diametros dos grupo existentes na estrutura principal
-	preencheMatrizDeDiametro(cuboDeDados, diametroDoGrupo);																														
-	
-	printf ("\n\n");
-	for (int i = 0; i < 10; i++){
-		for (int j = 0; j < 2; j++)
- 			printf ("%.2f\t", diametroDoGrupo[i][j]);
 		
-		printf ("\n");
-	}
+		//encontra grupo com maior diametro
+		indexMaiorDiametro = (int) identificaMaiorDiametro(diametroDoGrupo);
+		//essa variavel eh importante pois sera a partir dela que preencheremosa estrutura principal
+		printf("\nGrupo com maior diametro: %d", indexMaiorDiametro);
+		
+		//coloca em G o grupo com maior diametro
+			//reinicializa grupoG
+			inicializaMatrizNegativo(grupoG);
+			//passa o grupo de maior diametro pra G
+			preencheGcomMaiorDiametro(cuboDeDados, grupoG, indexMaiorDiametro);
+			
+		//atualizar qteElementos de grupoG
+		qteElementos = contaElementosGrupoG(grupoG);
+
+	}while (it <= maxGrupos-2);
 	
-	//encontra grupo com maior diametro
-	indexMaiorDiametro = identificaMaiorDiametro(diametroDoGrupo);
-	printf("\nGrupo com maior diametro: %d", indexMaiorDiametro);
-	
-	//coloca em G o grupo com maior diametro
-		//reinicializa grupoG
-		//passa o grupo de maior diametro pra G
-	
-	//atualizar qteElementos de grupoG
-	
-	
-	printf ("\n\nAGt:\n");
-	mostraElementosDoGrupo(cuboDeDados, 1);
-	
-	printf("\n\nQTE Elementos em G: %d\nQTE Elementos em tempG: %d\n\n", qteElementos, qteElementosTempG);
+	//printf("\n\nQTE Elementos em G: %d\nQTE Elementos em tempG: %d\n\n", qteElementos, qteElementosTempG);
 	
 	//mostraMatrixDx(Dx);
-	//mostraMatrix(tempG);
+	//mostraMatrix(grupoG);
 	
 	//printf ("\n\nGrupo vazio: %d", encontraGrupoVazio(cuboDeDados, maxGrupos));
 	
 	
 	//antes de preencher qualquer matriz é necessário reseta-la, ou seja, preenche-la com numeros negativos
-	/*
-	do{
-	
-			
-	}while(it < maxGrupos); // repete até que o numero de iterações seja o maxGrupos
-	*/
-	
+
 	//mostra a estrutura final com os grupos e seus elementos	
+	
+	for (int i = 50; i < NUM_GRUPOS; i++) {
+	
+		printf ("\n\nAGt %d:\n", i);
+		mostraElementosDoGrupo(cuboDeDados, i);
+	
+	}
 
 } //fim da int main
